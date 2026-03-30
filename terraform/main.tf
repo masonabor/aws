@@ -17,6 +17,20 @@ provider "aws" {
     region = "us-east-1"
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
 
 resource "aws_security_group" "lab6_sg" {
     name = "allow_web_ssh"
@@ -45,7 +59,7 @@ resource "aws_security_group" "lab6_sg" {
 }
 
 resource "aws_instance" "lab6_server" {
-    ami = "ami-0b0ea68c435eb488d"
+    ami = data.aws_ami.ubuntu.id
     instance_type = "t3.micro"
     key_name = "lab6key"
     vpc_security_group_ids = [aws_security_group.lab6_sg.id]
@@ -61,11 +75,17 @@ while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
 done
 
 apt-get update -y
+apt-get install -y ca-certificates curl gnupg lsb-release
+
+install -m 0755 -d /etc/apt/keyrings
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+
 apt-get update -y
-apt-get install -y docker.io
-systemctl enable docker
-systemctl start docker
-usermod -aG docker ubuntu
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 systemctl enable docker
 systemctl start docker
