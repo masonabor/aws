@@ -50,36 +50,41 @@ resource "aws_instance" "lab6_server" {
     vpc_security_group_ids = [aws_security_group.lab6_sg.id]
 
     user_data = <<-EOF
-              #!/bin/bash
-              set -e 
+                #!/bin/bash
+                set -e 
 
-              while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
-              
-              sudo apt update
-              sudo apt install ca-certificates curl
-              sudo install -m 0755 -d /etc/apt/keyrings
-              sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-              sudo chmod a+r /etc/apt/keyrings/docker.asc
+                # Чекаємо розблокування apt (критично для Ubuntu)
+                echo "Waiting for apt lock..."
+                while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
 
-              sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
-                    Types: deb
-                    URIs: https://download.docker.com/linux/ubuntu
-                    Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-                    Components: stable
-                    Architectures: $(dpkg --print-architecture)
-                    Signed-By: /etc/apt/keyrings/docker.asc
-              EOF
+                # Оновлення та встановлення базових залежностей
+                apt-get update -y
+                apt-get install -y ca-certificates curl gnupg
 
-              sudo apt update
-              sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-              sudo apt-get install docker-compose-plugin
+                # Налаштування ключів Docker
+                install -m 0755 -d /etc/apt/keyrings
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+                chmod a+r /etc/apt/keyrings/docker.asc
 
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker ubuntu
-              
-              ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
-              EOF
+                # Додавання репозиторію (використовуємо $$ для екранування змінних Terraform)
+                echo \
+                    "deb [arch=$$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+                    $$(. /etc/os-release && echo "$$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+                # Встановлення Docker та плагінів
+                apt-get update -y
+                apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+                # Запуск та налаштування прав
+                systemctl start docker
+                systemctl enable docker
+                usermod -aG docker ubuntu
+
+                # Створення посилання для docker-compose (щоб працювала команда з дефісом)
+                ln -sf /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+                
+                echo "Docker installation finished successfully!"
+                EOF
     
     tags = {
         Name = "DockerAppServer"
