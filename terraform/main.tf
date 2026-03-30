@@ -50,14 +50,23 @@ resource "aws_instance" "lab6_server" {
     vpc_security_group_ids = [aws_security_group.lab6_sg.id]
 
     user_data = <<-EOF
+              set -e 
+
               while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
               
               apt-get update -y
-              apt-get install -y docker.io docker-compose
+              apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+              add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+              
+              apt-get update -y
+              apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
               
               systemctl start docker
               systemctl enable docker
               usermod -aG docker ubuntu
+              
+              ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
               EOF
     
     tags = {
