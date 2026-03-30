@@ -36,6 +36,7 @@ resource "aws_security_group" "lab6_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 }
+
 resource "aws_instance" "lab6_server" {
     ami = "ami-0b0ea68c435eb488d"
     instance_type = "t3.micro"
