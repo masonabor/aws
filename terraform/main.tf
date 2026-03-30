@@ -50,6 +50,7 @@ resource "aws_instance" "lab6_server" {
     vpc_security_group_ids = [aws_security_group.lab6_sg.id]
 
     user_data = <<-EOF
+              #!/bin/bash
               set -e 
 
               while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
