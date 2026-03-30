@@ -1,0 +1,5 @@
+lab4key.pem
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars

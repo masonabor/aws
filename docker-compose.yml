@@ -1,0 +1,23 @@
+services:
+  lab4_app:
+    image: yurii2288/lab4_app:latest
+    restart: always
+  
+  nginx:
+    image: yurii2288/nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - lab4_app
+    restart: always
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    restart: always
+    environment:
+      - DOCKER_API_VERSION=1.45
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 60
+    
