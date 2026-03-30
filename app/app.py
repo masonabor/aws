@@ -2,6 +2,11 @@ from flask import Flask
 
 app = Flask(__name__)
 
+@app.route("/api/v1/hello", methods=["GET"])
+def hello():
+    res = {"hello": "hello"}
+    return res
+
 @app.route("/sort/<numbers>")
 def sort(numbers: str) -> str:
     try:
