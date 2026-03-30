@@ -17,6 +17,7 @@ provider "aws" {
     region = "us-east-1"
 }
 
+
 resource "aws_security_group" "lab6_sg" {
     name = "allow_web_ssh"
     description = "Allow ssh and http traffic"

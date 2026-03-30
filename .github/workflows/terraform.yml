@@ -59,16 +59,28 @@ jobs:
           source: "docker-compose.yml"
           target: "/home/ubuntu/"
 
-      - name: Debug Cloud-Init Logs
-        if: always() 
-        uses: appleboy/ssh-action@master
+      - name: Debug cloud-init
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.SERVER_IP }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "--- CLOUD-INIT LOGS ---"
-            sudo cat /var/log/cloud-init-output.log
+            echo "=== cloud-init status ==="
+            sudo cloud-init status --long || true
+
+            echo "=== cloud-init output log ==="
+            sudo tail -n 300 /var/log/cloud-init-output.log || true
+
+            echo "=== cloud-init main log ==="
+            sudo tail -n 300 /var/log/cloud-init.log || true
+
+            echo "=== os-release ==="
+            cat /etc/os-release || true
+
+            echo "=== docker path ==="
+            which docker || true
+            sudo which docker || true
 
       - name: Pull and Run Containers
         if: github.ref == 'refs/heads/main'
