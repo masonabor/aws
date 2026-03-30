@@ -62,8 +62,9 @@ jobs:
           host: ${{ env.SERVER_IP }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.yml"
-          target: "~/"
+          source: "../docker-compose.yml"
+          target: "/home/ubuntu/"
+          strip_component: 1
 
       - name: Pull and Run Containers
         if: github.ref == 'refs/heads/main'
@@ -73,12 +74,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            until sudo docker info > /dev/null 2>&1; do echo "Waiting for docker..."; sleep 5; done
+            cd /home/ubuntu
+            echo "Waiting for cloud-init to finish installation..."
+            sudo cloud-init status --wait
             
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-            
-            sudo docker pull yurii2288/lab4_app:latest
-            sudo docker pull yurii2288/nginx:latest
-            sudo docker pull containrrr/watchtower:latest
             
             sudo docker compose up -d --force-recreate

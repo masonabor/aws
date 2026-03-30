@@ -50,16 +50,21 @@ resource "aws_instance" "lab6_server" {
     vpc_security_group_ids = [aws_security_group.lab6_sg.id]
 
     user_data = <<-EOF
-                    sudo apt-get update
-                    sudo apt-get install -y docker.io docker-compose
-                    sudo systemctl start docker
-                    sudo usermod -aG docker ubuntu
-                    EOF
+              while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
+              
+              apt-get update -y
+              apt-get install -y docker.io docker-compose
+              
+              systemctl start docker
+              systemctl enable docker
+              usermod -aG docker ubuntu
+              EOF
     
     tags = {
         Name = "DockerAppServer"
     }
 }
+
 
 output "instance_public_ip" {
     value = aws_instance.lab6_server.public_ip
