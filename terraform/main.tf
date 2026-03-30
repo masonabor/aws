@@ -37,6 +37,7 @@ resource "aws_security_group" "lab6_sg" {
     }
 }
 
+
 resource "aws_instance" "lab6_server" {
     ami = "ami-0b0ea68c435eb488d"
     instance_type = "t3.micro"
