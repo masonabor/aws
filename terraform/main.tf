@@ -65,7 +65,6 @@ resource "aws_instance" "lab6_server" {
     }
 }
 
-
 output "instance_public_ip" {
     value = aws_instance.lab6_server.public_ip
 }
