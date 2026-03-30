@@ -59,6 +59,17 @@ jobs:
           source: "docker-compose.yml"
           target: "/home/ubuntu/"
 
+      - name: Debug Cloud-Init Logs
+        if: always() 
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "--- CLOUD-INIT LOGS ---"
+            sudo cat /var/log/cloud-init-output.log
+
       - name: Pull and Run Containers
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master

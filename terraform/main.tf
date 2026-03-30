@@ -86,6 +86,7 @@ resource "aws_instance" "lab6_server" {
                 echo "Docker installation finished successfully!"
                 EOF
     
+    
     tags = {
         Name = "DockerAppServer"
     }
