@@ -12,7 +12,7 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform
-        
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -38,6 +38,13 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+      - name: Wait for SSH connection
+        run: |
+          echo "Waiting for SSH to wake up..."
+          for i in {1..10}; do
+            nc -zv ${{ env.SERVER_IP }} 22 && break || sleep 5
+          done
 
       - name: Copy docker-compose.yml via SCP
         if: github.ref == 'refs/heads/main'
