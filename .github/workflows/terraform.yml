@@ -40,7 +40,7 @@ jobs:
 
       - name: Get Instance IP
         if: github.ref == 'refs/heads/main'
-        working-directory: /.terraform
+        working-directory: ./terraform
         run: |
           echo "SERVER_IP=$(terraform output -raw instance_public_ip)" >> $GITHUB_ENV
         env:
