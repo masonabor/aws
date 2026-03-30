@@ -64,7 +64,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "../docker-compose.yml"
           target: "/home/ubuntu/"
-          strip_component: 1
 
       - name: Pull and Run Containers
         if: github.ref == 'refs/heads/main'
