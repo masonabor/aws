@@ -7,6 +7,10 @@ def hello():
     res = {"hello": "hello"}
     return res
 
+@app.route("/user")
+def user():
+    return "user"
+
 @app.route("/sort/<numbers>")
 def sort(numbers: str) -> str:
     try:
